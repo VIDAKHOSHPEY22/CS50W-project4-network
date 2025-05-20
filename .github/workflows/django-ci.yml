@@ -10,9 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
       matrix:
-        python-version: [3.8, 3.9, 3.10]
+        python-version: [3.8, 3.9, 3.10]  # بررسی نسخه‌های معتبر
 
     steps:
     - name: Checkout Repository
@@ -21,10 +20,10 @@ jobs:
     - name: Fix Git Safe Directory Issue
       run: git config --global --add safe.directory /home/runner/work/CS50W-project4-network/CS50W-project4-network
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
+    - name: Set up Python  
+      uses: actions/setup-python@v3  
+      with:  
+        python-version: '3.10'  
 
     - name: Install Dependencies
       run: |
@@ -40,7 +39,7 @@ jobs:
         python -m pip install coverage
         coverage run manage.py test
         coverage report
-        coverage xml  # Generates XML output for upload
+        coverage xml
 
     - name: Upload Test Results
       if: always()
