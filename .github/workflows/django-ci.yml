@@ -46,9 +46,12 @@ jobs:
         coverage report
         coverage xml
 
+    - name: Remove Existing Artifact (if present)
+      run: rm -rf test-results || true
+
     - name: Upload Test Results
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-results-${{ github.run_id }}  # Adds a unique ID to avoid conflicts
+        name: test-results-${{ github.run_id }}  # Generates unique artifact names
         path: coverage.xml
