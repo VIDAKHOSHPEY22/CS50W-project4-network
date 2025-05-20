@@ -1,0 +1,225 @@
+/* --- General --- */
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #fceabb 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 700px;
+    margin-top: 2rem;
+}
+
+/* --- Navbar --- */
+.navbar {
+    margin-bottom: 2rem;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    color: #ff4081 !important;
+}
+.nav-link {
+    font-size: 1.08rem;
+    color: #333 !important;
+    margin-right: 1rem;
+}
+.nav-link.active, .nav-link:focus, .nav-link:hover {
+    color: #ff4081 !important;
+}
+
+/* --- Post Card --- */
+.card.post-card {
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    border: none;
+    margin-bottom: 2.2rem;
+    background: #fff;
+    transition: box-shadow 0.2s;
+    position: relative;
+}
+.card.post-card:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+}
+.card.post-card .card-body {
+    padding: 1.2rem 1rem 1rem 1rem;
+}
+
+/* --- Post Header --- */
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.post-profile-img, .profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ff4081;
+    background: #fff;
+}
+.post-username {
+    font-weight: bold;
+    color: #222;
+    font-size: 1.1rem;
+    text-decoration: none;
+}
+.post-date {
+    margin-left: auto;
+    color: #aaa;
+    font-size: 0.95rem;
+}
+
+/* --- Post Content & Image --- */
+.card.post-card p {
+    font-size: 1.13rem;
+    margin-bottom: 0.7rem;
+    color: #333;
+}
+.card.post-card img.post-image {
+    max-height: 350px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    border: 1px solid #eee;
+}
+
+/* عکس پروفایل کنار هر پست */
+.post-profile-img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid #ff4081;
+    background: #fff;
+    margin-right: 0.7rem;
+}
+.navbar .post-profile-img {
+    width: 28px;
+    height: 28px;
+    margin-right: 0.5rem;
+    border-width: 1px;
+}
+
+/* عکس داخل پست */
+.post-image {
+    max-height: 220px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    border: 1px solid #eee;
+}
+
+/* --- Like Button --- */
+.card.post-card .like-btn {
+    min-width: 90px;
+    font-weight: bold;
+    transition: background 0.2s, color 0.2s;
+    border-radius: 20px;
+    padding: 0.3rem 1.2rem;
+}
+.card.post-card .like-btn.btn-primary {
+    background: #ff4081;
+    border-color: #ff4081;
+    color: #fff;
+}
+.card.post-card .like-btn.btn-outline-primary {
+    color: #ff4081;
+    border-color: #ff4081;
+    background: #fff;
+}
+.card.post-card .like-count {
+    font-weight: bold;
+    color: #ff4081;
+}
+
+/* --- Profile Header --- */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    background: #fff;
+    padding: 1.5rem 1rem;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+}
+.profile-header h2 {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #222;
+}
+.profile-header span {
+    font-size: 1.08rem;
+    color: #666;
+}
+
+/* --- Followers/Following List (optional) --- */
+.follow-list {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.7rem;
+}
+.follow-list .follow-item {
+    font-size: 1.05rem;
+    color: #444;
+}
+.follow-list .follow-item strong {
+    color: #ff4081;
+}
+
+/* --- Responsive --- */
+@media (max-width: 576px) {
+    .container {
+        max-width: 100%;
+        padding: 0 5px;
+    }
+    .navbar-brand {
+        font-size: 1.15rem;
+    }
+    .card-body {
+        padding: 0.8rem;
+    }
+    .btn, .btn-outline-primary, .btn-outline-danger {
+        font-size: 0.95rem;
+        min-width: 70px;
+    }
+    .profile-header {
+        flex-direction: column;
+        gap: 0.7rem;
+        padding: 1rem 0.5rem;
+        text-align: center;
+    }
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+    }
+    .post-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .post-profile-img {
+        width: 38px;
+        height: 38px;
+    }
+}
+
+/* --- Alerts --- */
+.alert {
+    font-size: 1rem;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+

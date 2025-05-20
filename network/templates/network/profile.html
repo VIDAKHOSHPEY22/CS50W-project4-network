@@ -1,0 +1,382 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+<style>
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        background: #fff;
+        padding: 1.5rem 1rem;
+        border-radius: 18px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .profile-avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #ff4081;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(255,64,129,0.08);
+    }
+    .profile-header h2 {
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        color: #222;
+    }
+    .profile-header span {
+        font-size: 1.08rem;
+        color: #666;
+    }
+    .profile-header form {
+        margin-top: 1rem;
+    }
+    .followers-list, .following-list {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        padding: 1rem;
+        margin-bottom: 1.2rem;
+    }
+    .followers-list h5, .following-list h5 {
+        font-size: 1.1rem;
+        color: #ff4081;
+        margin-bottom: 0.7rem;
+    }
+    .followers-list ul, .following-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .followers-list li, .following-list li {
+        margin-bottom: 0.4rem;
+        font-size: 1rem;
+    }
+    .followers-list a, .following-list a {
+        color: #222;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .followers-list a:hover, .following-list a:hover {
+        color: #ff4081;
+    }
+    .btn-outline-primary, .btn-outline-danger {
+        border-radius: 20px;
+        padding: 0.2rem 1.1rem;
+    }
+    .btn-primary, .btn-outline-primary:focus {
+        background: #ff4081;
+        border-color: #ff4081;
+        color: #fff;
+    }
+    .btn-outline-primary {
+        color: #ff4081;
+        border-color: #ff4081;
+        background: #fff;
+    }
+    .btn-outline-danger {
+        color: #ff4081;
+        border-color: #ff4081;
+        background: #fff;
+    }
+    .card.mb-3 {
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        border: none;
+        margin-bottom: 1.5rem;
+        background: #fff;
+        transition: box-shadow 0.2s;
+    }
+    .card.mb-3:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+    .card.mb-3 .card-body {
+        padding: 1.2rem 1rem 1rem 1rem;
+    }
+    .card.mb-3 img {
+        max-height: 220px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid #eee;
+    }
+    .like-btn {
+        min-width: 80px;
+        font-weight: bold;
+        border-radius: 20px;
+        padding: 0.3rem 1.2rem;
+        color: #ff4081;
+        border-color: #ff4081;
+        background: #fff;
+        transition: background 0.2s, color 0.2s;
+    }
+    .like-btn.btn-primary {
+        background: #ff4081;
+        border-color: #ff4081;
+        color: #fff;
+    }
+    @media (max-width: 576px) {
+        .profile-header {
+            flex-direction: column;
+            gap: 0.7rem;
+            padding: 1rem 0.5rem;
+            text-align: center;
+        }
+        .profile-avatar {
+            width: 65px;
+            height: 65px;
+        }
+        .card.mb-3 .card-body {
+            padding: 0.7rem 0.5rem 0.5rem 0.5rem;
+        }
+        .card.mb-3 img {
+            max-height: 120px;
+        }
+    }
+</style>
+
+<!-- نمایش عکس پروفایل و دکمه ویرایش -->
+<div class="profile-header mb-4">
+    <img src="{% if profile_user.profile_image %}{{ profile_user.profile_image }}{% else %}https://ui-avatars.com/api/?name={{ profile_user.username }}{% endif %}"
+         class="profile-avatar"
+         alt="Avatar"
+         id="profile-avatar-img"
+         style="cursor:pointer;">
+    <div>
+        <h2>{{ profile_user.username }}</h2>
+        <span>
+            <strong>{{ followers_count }}</strong>
+            <a href="#" id="show-followers" style="color:#ff4081;text-decoration:underline;">followers</a>
+        </span>
+        |
+        <span>
+            <strong>{{ following_count }}</strong>
+            <a href="#" id="show-following" style="color:#ff4081;text-decoration:underline;">following</a>
+        </span>
+        {% if user == profile_user %}
+            <button id="show-edit-profile" class="btn btn-sm btn-outline-primary ms-2" type="button" style="margin-top:0.7rem;">
+                <i class="fa fa-edit"></i> Edit Profile
+            </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- فرم ویرایش عکس پروفایل (در ابتدا مخفی) -->
+{% if user == profile_user %}
+<form id="edit-profile-form" action="{% url 'edit_profile' %}" method="post" class="mt-3 d-none">
+    {% csrf_token %}
+    <input type="url" name="profile_image" class="form-control mb-2" placeholder="Profile image URL" value="{{ user.profile_image }}">
+    <button type="submit" class="btn btn-sm btn-primary">Update Profile Image</button>
+</form>
+{% endif %}
+
+<!-- لیست فالوورها -->
+<div class="followers-list d-none" id="followers-list">
+    <h5>Followers</h5>
+    <ul>
+        {% for follower in followers %}
+            <li>
+                <a href="{% url 'profile' follower.user.username %}">
+                    {% if follower.user.profile_image %}
+                        <img src="{{ follower.user.profile_image }}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-right:0.4rem;">
+                    {% endif %}
+                    {{ follower.user.username }}
+                </a>
+            </li>
+        {% empty %}
+            <li class="text-muted">No followers yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+<!-- لیست فالویینگ -->
+<div class="following-list d-none" id="following-list">
+    <h5>Following</h5>
+    <ul>
+        {% for follow in following %}
+            <li>
+                <a href="{% url 'profile' follow.following.username %}">
+                    {% if follow.following.profile_image %}
+                        <img src="{{ follow.following.profile_image }}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-right:0.4rem;">
+                    {% endif %}
+                    {{ follow.following.username }}
+                </a>
+            </li>
+        {% empty %}
+            <li class="text-muted">Not following anyone yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% if user.is_authenticated and user != profile_user %}
+    {% if is_following %}
+        <form action="{% url 'unfollow_user' profile_user.username %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-sm">Unfollow</button>
+        </form>
+    {% else %}
+        <form action="{% url 'follow_user' profile_user.username %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary btn-sm">Follow</button>
+        </form>
+    {% endif %}
+{% endif %}
+
+
+<hr>
+<h4>Posts</h4>
+{% for post in page_obj %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <small class="text-muted float-end">{{ post.timestamp|date:"M d, Y H:i" }}</small>
+            <div>
+                <button class="btn btn-sm btn-outline-primary like-btn" data-post-id="{{ post.id }}">
+                    Like (<span class="like-count">{{ post.likes.count }}</span>)
+                </button>
+                {% if user == post.author %}
+                    <button class="btn btn-sm btn-outline-secondary edit-post-btn ml-2" data-post-id="{{ post.id }}">
+                        <i class="fa fa-edit"></i> Edit
+                    </button>
+                {% endif %}
+            </div>
+            <p class="mb-2 post-content">{{ post.content }}</p>
+            {% if post.image %}
+                <img src="{{ post.image }}" class="img-fluid rounded mb-2" alt="Post image">
+            {% endif %}
+            <form class="edit-post-form d-none mt-2" id="edit-post-form-{{ post.id }}" action="{% url 'edit_post' post.id %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <textarea name="content" class="form-control" rows="2">{{ post.content }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn" data-post-id="{{ post.id }}">Cancel</button>
+            </form>
+
+            <!-- نمایش کامنت‌ها و ریپلای -->
+            <div class="comment-list mt-2">
+                {% for comment in post.comments.all %}
+                    {% if not comment.parent %}
+                    <div class="comment-item mb-1">
+                        <span class="comment-author text-primary">{{ comment.author.username }}</span>
+                        {{ comment.content }}
+                        <span class="text-muted" style="font-size:0.85em;">{{ comment.timestamp|date:"M d, H:i" }}</span>
+                        <!-- دکمه ریپلای -->
+                        {% if user.is_authenticated %}
+                        <a href="#" class="reply-link text-info ml-2" data-comment-id="{{ comment.id }}">Reply</a>
+                        <!-- فرم ریپلای (در ابتدا مخفی) -->
+                        <form class="reply-form mt-1 d-none" id="reply-form-{{ comment.id }}" action="{% url 'add_comment' post.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                            <div class="input-group input-group-sm">
+                                <input name="content" class="form-control" placeholder="Reply..." required>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-primary" type="submit"><i class="fa fa-paper-plane"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                        {% endif %}
+                        <!-- نمایش ریپلای‌ها -->
+                        {% for reply in comment.replies.all %}
+                            <div class="comment-item ml-4 mt-1">
+                                <span class="comment-author text-success">{{ reply.author.username }}</span>
+                                {{ reply.content }}
+                                <span class="text-muted" style="font-size:0.8em;">{{ reply.timestamp|date:"M d, H:i" }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <!-- فرم کامنت اصلی -->
+            {% if user.is_authenticated %}
+            <form class="comment-form mt-2" action="{% url 'add_comment' post.id %}" method="post">
+                {% csrf_token %}
+                <div class="input-group">
+                    <textarea name="content" class="form-control" rows="1" placeholder="Add a comment..." required></textarea>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="submit"><i class="fa fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+{% empty %}
+    <p>No posts yet.</p>
+{% endfor %}
+
+<!-- Pagination controls -->
+<nav>
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+    </ul>
+</nav>
+
+<script>
+document.querySelectorAll('.reply-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const form = document.getElementById('reply-form-' + this.dataset.commentId);
+        if (form.classList.contains('d-none')) {
+            form.classList.remove('d-none');
+        } else {
+            form.classList.add('d-none');
+        }
+    });
+});
+document.querySelectorAll('.edit-post-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const postId = this.dataset.postId;
+        document.getElementById('edit-post-form-' + postId).classList.remove('d-none');
+        this.closest('.card-body').querySelector('.post-content').classList.add('d-none');
+        this.classList.add('d-none');
+    });
+});
+document.querySelectorAll('.cancel-edit-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const postId = this.dataset.postId;
+        document.getElementById('edit-post-form-' + postId).classList.add('d-none');
+        const cardBody = this.closest('.card-body');
+        cardBody.querySelector('.post-content').classList.remove('d-none');
+        cardBody.querySelector('.edit-post-btn').classList.remove('d-none');
+    });
+});
+
+// نمایش و مخفی‌سازی لیست فالوورها و فالویینگ
+document.getElementById('show-followers').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('followers-list').classList.toggle('d-none');
+    document.getElementById('following-list').classList.add('d-none');
+});
+document.getElementById('show-following').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('following-list').classList.toggle('d-none');
+    document.getElementById('followers-list').classList.add('d-none');
+});
+
+{% if user == profile_user %}
+document.getElementById('profile-avatar-img').addEventListener('click', function() {
+    document.getElementById('edit-profile-form').classList.toggle('d-none');
+});
+document.getElementById('show-edit-profile').addEventListener('click', function() {
+    document.getElementById('edit-profile-form').classList.toggle('d-none');
+});
+{% endif %}
+</script>
+{% endblock %}

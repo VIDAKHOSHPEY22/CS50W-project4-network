@@ -1,0 +1,248 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+<style>
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.7rem;
+    }
+    .post-profile-img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1.5px solid #ff4081;
+        background: #fff;
+        margin-right: 0.7rem;
+    }
+    .post-username {
+        font-weight: bold;
+        color: #222;
+        font-size: 1.05rem;
+        text-decoration: none;
+        margin-right: 0.5rem;
+    }
+    .post-date {
+        color: #aaa;
+        font-size: 0.95rem;
+        margin-left: auto;
+    }
+    .post-image {
+        display: block;
+        max-height: 420px;
+        min-height: 220px;
+        width: 100%;
+        object-fit: cover;
+        background: #fafafa;
+        border-radius: 18px;
+        margin: 0 auto 1rem auto;
+        border: 1.5px solid #eee;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        transition: box-shadow 0.2s, border 0.2s;
+    }
+    .post-image:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+        border-color: #ff4081;
+    }
+    .card.mb-3 {
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        border: none;
+        margin-bottom: 1.5rem;
+        background: #fff;
+        transition: box-shadow 0.2s;
+    }
+    .card.mb-3:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+    .like-btn {
+        min-width: 80px;
+        font-weight: bold;
+        border-radius: 20px;
+        padding: 0.3rem 1.2rem;
+        color: #ff4081;
+        border-color: #ff4081;
+        background: #fff;
+        transition: background 0.2s, color 0.2s;
+    }
+    .like-btn.btn-primary {
+        background: #ff4081;
+        border-color: #ff4081;
+        color: #fff;
+    }
+    .comment-form textarea {
+        border-radius: 12px;
+        resize: none;
+    }
+    .comment-list {
+        margin-top: 0.7rem;
+        padding-left: 0.5rem;
+    }
+    .comment-item {
+        font-size: 0.97rem;
+        margin-bottom: 0.3rem;
+        color: #444;
+    }
+    .comment-author {
+        font-weight: bold;
+        color: #ff4081;
+        margin-right: 0.3rem;
+    }
+    @media (max-width: 576px) {
+        .post-profile-img {
+            width: 24px;
+            height: 24px;
+        }
+        .post-image {
+            max-height: 140px;
+            min-height: 80px;
+        }
+        .card.mb-3 .card-body {
+            padding: 0.7rem 0.5rem 0.5rem 0.5rem;
+        }
+    }
+</style>
+
+<h2 class="mb-4"><i class="fa fa-users text-danger"></i> Following</h2>
+{% if page_obj %}
+    {% for post in page_obj %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="post-header">
+                    <img src="{% if post.author.profile_image %}{{ post.author.profile_image }}{% else %}https://ui-avatars.com/api/?name={{ post.author.username }}{% endif %}" class="post-profile-img" alt="Profile">
+                    <a href="{% url 'profile' post.author.username %}" class="post-username">{{ post.author.username }}</a>
+                    <span class="post-date"><i class="fa fa-clock"></i> {{ post.timestamp|date:"M d, Y H:i" }}</span>
+                </div>
+                <p>{{ post.content }}</p>
+                {% if post.image %}
+                    <img src="{{ post.image }}" class="post-image" alt="Post image">
+                {% endif %}
+                <div>
+                    <button class="btn btn-sm {% if user in post.likes.all %}btn-primary{% else %}btn-outline-primary{% endif %} like-btn" data-post-id="{{ post.id }}">
+                        <i class="fa{% if user in post.likes.all %}s{% else %}r{% endif %} fa-heart"></i>
+                        <span class="like-count">{{ post.likes.count }}</span>
+                    </button>
+                </div>
+                <!-- کامنت‌ها -->
+                <div class="comment-list mt-2">
+                    {% for comment in post.comments.all %}
+                        {% if not comment.parent %}
+                        <div class="comment-item mb-1">
+                            <span class="comment-author text-primary">{{ comment.author.username }}</span>
+                            {{ comment.content }}
+                            <span class="text-muted" style="font-size:0.85em;">{{ comment.timestamp|date:"M d, H:i" }}</span>
+                            <!-- دکمه ریپلای -->
+                            {% if user.is_authenticated %}
+                            <a href="#" class="reply-link text-info ml-2" data-comment-id="{{ comment.id }}">Reply</a>
+                            <!-- فرم ریپلای (در ابتدا مخفی) -->
+                            <form class="reply-form mt-1 d-none" id="reply-form-{{ comment.id }}" action="{% url 'add_comment' post.id %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                <div class="input-group input-group-sm">
+                                    <input name="content" class="form-control" placeholder="Reply..." required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-primary" type="submit"><i class="fa fa-paper-plane"></i></button>
+                                    </div>
+                                </div>
+                            </form>
+                            {% endif %}
+                            <!-- نمایش ریپلای‌ها -->
+                            {% for reply in comment.replies.all %}
+                                <div class="comment-item ml-4 mt-1">
+                                    <span class="comment-author text-success">{{ reply.author.username }}</span>
+                                    {{ reply.content }}
+                                    <span class="text-muted" style="font-size:0.8em;">{{ reply.timestamp|date:"M d, H:i" }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <!-- فرم کامنت اصلی -->
+                {% if user.is_authenticated %}
+                <form class="comment-form mt-2" action="{% url 'add_comment' post.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <textarea name="content" class="form-control" rows="1" placeholder="Add a comment..." required></textarea>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-primary" type="submit"><i class="fa fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <p>No posts from users you follow yet.</p>
+    {% endfor %}
+
+    <!-- Pagination controls -->
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="fa fa-chevron-left"></i></a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link"><i class="fa fa-chevron-left"></i></span></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fa fa-chevron-right"></i></a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link"><i class="fa fa-chevron-right"></i></span></li>
+            {% endif %}
+        </ul>
+    </nav>
+{% else %}
+    <p>You are not following anyone yet.</p>
+{% endif %}
+
+<script>
+document.querySelectorAll('.reply-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const form = document.getElementById('reply-form-' + this.dataset.commentId);
+        if (form.classList.contains('d-none')) {
+            form.classList.remove('d-none');
+        } else {
+            form.classList.add('d-none');
+        }
+    });
+});
+
+// Like/Unlike AJAX
+document.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const postId = this.dataset.postId;
+        fetch(`/like/${postId}`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update like count
+            this.querySelector('.like-count').textContent = data.likes;
+            // Toggle button style and icon
+            if (data.liked) {
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+                this.querySelector('i').classList.remove('far');
+                this.querySelector('i').classList.add('fas');
+            } else {
+                this.classList.remove('btn-primary');
+                this.classList.add('btn-outline-primary');
+                this.querySelector('i').classList.remove('fas');
+                this.querySelector('i').classList.add('far');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
