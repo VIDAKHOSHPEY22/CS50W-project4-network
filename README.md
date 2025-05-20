@@ -31,15 +31,17 @@ This project is an interactive social networking platform where users can regist
    git clone https://github.com/yourusername/harvard-social-network.git
    cd harvard-social-network
 
----
-
-python -m venv venv  
+   python -m venv venv  
 source venv/bin/activate  # (On Windows use venv\Scripts\activate)  
 pip install -r requirements.txt  
 
 
 python manage.py migrate  
 python manage.py runserver 
+
+
+---
+
 
 
 I've made sure all code blocks use the correct syntax highlighting for Bash commands. This should improve readability and maintain consistency. Let me know if you need any additional tweaks! 🚀
