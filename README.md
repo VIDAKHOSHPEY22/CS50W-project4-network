@@ -30,14 +30,9 @@ This project is an interactive social networking platform where users can regist
    ```bash
    git clone https://github.com/yourusername/harvard-social-network.git
    cd harvard-social-network
-
-   python -m venv venv  
-source venv/bin/activate  # (On Windows use venv\Scripts\activate)  
-pip install -r requirements.txt  
-
-
-python manage.py migrate  
-python manage.py runserver 
+   pip install -r requirements.txt  
+   python manage.py migrate  
+   python manage.py runserver 
 
 
 ---
