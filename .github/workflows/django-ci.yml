@@ -50,5 +50,5 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-results-${{ github.run_id }}  # Ensures unique artifact names
+        name: test-results-${{ github.run_id }}  # Adds a unique ID to avoid conflicts
         path: coverage.xml
