@@ -28,8 +28,8 @@ This project is an interactive social networking platform where users can regist
 1. Clone the repository:  
 
    ```bash
-   git clone https://github.com/yourusername/harvard-social-network.git
-   cd harvard-social-network
+   git clone [https://github.com/VIDAKHOSHPEY22/CS50W-project4-network.git]
+   cd CS50W-project4-network
    pip install -r requirements.txt  
    python manage.py migrate  
    python manage.py runserver 
