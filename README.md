@@ -41,3 +41,6 @@ This project is an interactive social networking platform where users can regist
 
 I've made sure all code blocks use the correct syntax highlighting for Bash commands. This should improve readability and maintain consistency. Let me know if you need any additional tweaks! 🚀
 
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
