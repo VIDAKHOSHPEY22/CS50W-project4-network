@@ -9,24 +9,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        python-version: [3.8, 3.9, 3.10]  # ✅ Only valid Python versions
+        python-version: [3.8, 3.9, 3.10]  # ✅ Only valid versions
 
     steps:
-    - name: 📥 Checkout Repository
+    - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: 🛠️ Fix Git Safe Directory Issue
+    - name: Fix Git Safe Directory Issue
       run: git config --global --add safe.directory $GITHUB_WORKSPACE
 
-    - name: 🐍 Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: 📦 Install Dependencies
+    - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then
@@ -36,22 +35,23 @@ jobs:
           exit 1
         fi
 
-    - name: ⚙️ Run Migrations (SQLite)
-      run: python manage.py migrate
-
-    - name: 🧪 Run Tests with Coverage
+    - name: Set up Database (SQLite)
       run: |
-        pip install coverage
+        python manage.py migrate
+
+    - name: Run Tests with Coverage
+      run: |
+        python -m pip install coverage
         coverage run manage.py test
         coverage report
         coverage xml
 
-    - name: 🧹 Remove Existing Artifact Folder (if present)
+    - name: Remove Existing Artifact (if present)
       run: rm -rf test-results || true
 
-    - name: 📤 Upload Test Results
+    - name: Upload Test Results
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-results-${{ github.run_id }}  # ✅ Unique name to avoid conflict
+        name: test-results-${{ github.run_id }}  # ✅ unique name to prevent conflict
         path: coverage.xml
